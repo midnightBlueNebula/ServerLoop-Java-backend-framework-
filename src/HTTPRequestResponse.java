@@ -31,7 +31,8 @@ public class HTTPRequestResponse extends SocketReaderWriter {
         String reqFirstLine = super.readLineFromRequestStream();
 
         if(reqFirstLine == null || reqFirstLine.isEmpty()) {
-            throw new RuntimeException(new IOException("Input stream of request is null or empty"));
+            System.err.println("Input stream of request is null or empty");
+            return;
         }
 
         requestHeaders.put("First-line", reqFirstLine);
