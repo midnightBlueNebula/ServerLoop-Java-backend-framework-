@@ -61,6 +61,11 @@ public class HTTPServer {
         routeController.delete(path, handler);
     }
 
+    // registers application-level middleware.
+    public void use(EventCallback middleware){
+        routeController.use(middleware);
+    }
+
     private static void handleSocketError(IOException e) {
         System.out.println(e.getMessage());
     }

@@ -1,4 +1,5 @@
 import java.util.HashMap;
+import java.util.LinkedList;
 
 /*
 registers callbacks for specified paths and HTTP methods.
@@ -9,6 +10,8 @@ public class RouteController {
     // stores path & method as key and callback as value.
     // callback is a lambda stored as instance of functional interface EventCallback.
     static HashMap<String, EventCallback> pathHandlers = new HashMap<>();
+    // stores application-level middleware.
+    static LinkedList<EventCallback> applicationLevelMiddleware = new LinkedList<>();
     private String path = "";
 
     public RouteController(){
@@ -88,6 +91,8 @@ public class RouteController {
     // fetches method and path of client requests.
     // then, invokes the corresponding callback.
     protected static void forwardRequestToRoute(SocketStream streamer){
+        executeAppLevelMiddleware(streamer);
+
         String method = streamer.getRequestHeader("method");
         String path = streamer.getRequestHeader("path");
         EventCallback callback = getHandler(HTTPMethod.valueOf(method), path);
@@ -111,5 +116,17 @@ public class RouteController {
         }
 
         return methodName + "-" + path;
+    }
+
+    // registers application-level middleware.
+    public void use(EventCallback middleware){
+        applicationLevelMiddleware.add(middleware);
+    }
+
+    // executes all registered application-level middleware if exist.
+    private static void executeAppLevelMiddleware(SocketStream streamer){
+        for(EventCallback middleware : applicationLevelMiddleware){
+            middleware.apply(streamer);
+        }
     }
 }
